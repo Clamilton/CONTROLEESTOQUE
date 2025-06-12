@@ -3,26 +3,20 @@ import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function Index() {
-  const [cnpj, setCnpj] = useState("12345678000123"); // CNPJ de teste
+  const [cnpj, setCnpj] = useState("12345678000123");
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   
   const router = useRouter();
-  
-  // URL da nossa VPS
   const VPS_URL = "http://31.97.24.246:3000";
 
   const verificarConexaoVPS = async () => {
     try {
       const response = await fetch(`${VPS_URL}/health`);
       const data = await response.json();
-      
-      if (data.status === 'online') {
-        return true;
-      }
-      return false;
+      return data.status === 'online';
     } catch (error) {
       console.error('Erro ao conectar VPS:', error);
       return false;
@@ -33,7 +27,6 @@ export default function Index() {
     try {
       const response = await fetch(`${VPS_URL}/api/lojas/status`);
       const lojas = await response.json();
-      
       const lojaEncontrada = lojas.find((loja: any) => loja.cnpj === cnpjLoja);
       return lojaEncontrada?.status === 'online';
     } catch (error) {
@@ -46,7 +39,6 @@ export default function Index() {
     setErro("");
     setCarregando(true);
 
-    // Validações básicas
     if (!cnpj.trim()) {
       setErro("Digite o CNPJ da empresa");
       setCarregando(false);
@@ -66,7 +58,6 @@ export default function Index() {
     }
 
     try {
-      // 1. Verificar se VPS está online
       console.log('Verificando conexão com VPS...');
       const vpsOnline = await verificarConexaoVPS();
       
@@ -76,7 +67,6 @@ export default function Index() {
         return;
       }
 
-      // 2. Verificar se a loja está conectada
       console.log('Verificando se loja está online...');
       const lojaOnline = await verificarLojaOnline(cnpj);
       
@@ -86,10 +76,7 @@ export default function Index() {
         return;
       }
 
-      // 3. Por enquanto, aceitar qualquer usuário/senha
       console.log('Login realizado com sucesso');
-      
-      // Navegar para tela de produtos
       router.push({
         pathname: "/produtos",
         params: { cnpj: cnpj }
